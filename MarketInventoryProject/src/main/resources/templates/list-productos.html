@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Productos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
+    <style>
+        .sort-link { text-decoration: none; }
+        .sort-link.active { font-weight: bold; }
+        .pagination .page-item.disabled .page-link { pointer-events: none; color: #6c757d; }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Lista de Productos</h1>
+
+    <!-- Mensajes -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+
+    <!-- Formulario de búsqueda + botón de Añadir -->
+    <div class="row mb-3">
+        <form class="col-auto row g-2" method="get" th:action="@{/web/productos}">
+            <div class="col-auto">
+                <input type="text" name="term" class="form-control" placeholder="Buscar por ID o nombre"
+                       th:value="${searchTerm}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-primary">Buscar</button>
+                <a th:href="@{/web/productos}" class="btn btn-outline-secondary">Ver todos</a>
+            </div>
+        </form>
+        <div class="col-auto">
+            <a th:href="@{/web/productos/nuevo}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Añadir Nuevo Producto
+            </a>
+        </div>
+    </div>
+
+    <!-- Resultados de búsqueda -->
+    <div th:if="${searchTerm}">
+        <h5 th:text="|Resultados para &quot;${searchTerm}&quot;:|"></h5>
+        <div th:if="${#lists.isEmpty(resultados)}" class="alert alert-info">
+            No se encontraron productos.
+        </div>
+        <table th:if="${!#lists.isEmpty(resultados)}" class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="prod : ${resultados}">
+                <td th:text="${prod.id}">1</td>
+                <td th:text="${prod.nombre}">Nombre</td>
+                <td th:text="${prod.descripcion}">Descripción</td>
+                <td th:text="${#numbers.formatCurrency(prod.precio)}">0.00</td>
+                <td th:text="${prod.stock}">0</td>
+                <td>
+                    <a th:href="@{/web/productos/editar/{id}(id=${prod.id})}" class="btn btn-sm btn-warning">Editar</a>
+                    <a th:href="@{/web/productos/eliminar/{id}(id=${prod.id})}"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('¿Eliminar este producto?');">Eliminar</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Vista normal con paginación -->
+    <div th:if="${searchTerm == null}">
+        <div th:if="${productosPage.hasContent()}">
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>
+                        <a th:href="@{/web/productos(
+                            page=${productosPage.number},
+                            size=${productosPage.size},
+                            sort=${'id,' + (currentSort.contains('id: ASC') ? 'desc' : 'asc')}
+                        )}"
+                           class="sort-link"
+                           th:classappend="${currentSort.contains('id:')} ? 'active'">ID</a>
+                    </th>
+                    <th>
+                        <a th:href="@{/web/productos(
+                            page=${productosPage.number},
+                            size=${productosPage.size},
+                            sort=${'nombre,' + (currentSort.contains('nombre: ASC') ? 'desc' : 'asc')}
+                        )}"
+                           class="sort-link"
+                           th:classappend="${currentSort.contains('nombre:')} ? 'active'">Nombre</a>
+                    </th>
+                    <th>Descripción</th>
+                    <th>
+                        <a th:href="@{/web/productos(
+                            page=${productosPage.number},
+                            size=${productosPage.size},
+                            sort=${'precio,' + (currentSort.contains('precio: ASC') ? 'desc' : 'asc')}
+                        )}"
+                           class="sort-link"
+                           th:classappend="${currentSort.contains('precio:')} ? 'active'">Precio</a>
+                    </th>
+                    <th>
+                        <a th:href="@{/web/productos(
+                            page=${productosPage.number},
+                            size=${productosPage.size},
+                            sort=${'stock,' + (currentSort.contains('stock: ASC') ? 'desc' : 'asc')}
+                        )}"
+                           class="sort-link"
+                           th:classappend="${currentSort.contains('stock:')} ? 'active'">Stock</a>
+                    </th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="prod : ${productosPage.content}">
+                    <td th:text="${prod.id}">1</td>
+                    <td th:text="${prod.nombre}">Nombre</td>
+                    <td th:text="${prod.descripcion}">Descripción</td>
+                    <td th:text="${#numbers.formatCurrency(prod.precio)}">0.00</td>
+                    <td th:text="${prod.stock}">0</td>
+                    <td>
+                        <a th:href="@{/web/productos/editar/{id}(id=${prod.id})}" class="btn btn-sm btn-warning">Editar</a>
+                        <a th:href="@{/web/productos/eliminar/{id}(id=${prod.id})}"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('¿Eliminar este producto?');">Eliminar</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- Paginación -->
+            <nav aria-label="Navegación de página">
+                <ul class="pagination justify-content-center flex-wrap">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/web/productos(page=0, size=${productosPage.size}, sort=${sortParams})}">&laquo; Primera</a>
+                    </li>
+                    <li class="page-item" th:classappend="${productosPage.first} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/web/productos(page=${currentPage - 1}, size=${productosPage.size}, sort=${sortParams})}">Anterior</a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/web/productos(page=${i}, size=${productosPage.size}, sort=${sortParams})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${productosPage.last} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/web/productos(page=${currentPage + 1}, size=${productosPage.size}, sort=${sortParams})}">Siguiente</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == productosPage.totalPages - 1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/web/productos(page=${productosPage.totalPages - 1}, size=${productosPage.size}, sort=${sortParams})}">Última &raquo;</a>
+                    </li>
+                </ul>
+                <div class="text-center mt-2">
+                    <small th:text="|Página ${(currentPage + 1)} de ${productosPage.totalPages} (${productosPage.totalElements} productos)|"></small>
+                </div>
+            </nav>
+        </div>
+        <div th:unless="${productosPage.hasContent()}" class="alert alert-info">
+            No hay productos para mostrar.
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>
+
