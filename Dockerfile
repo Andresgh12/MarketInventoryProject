@@ -1,20 +1,21 @@
-# etapa de build con Maven y JDK 17
+# Etapa de build
 FROM maven:3.8.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# copiar pom y código fuente
-COPY pom.xml .
-COPY src ./src
+# Copiamos pom.xml y src/ desde la subcarpeta donde está tu código
+COPY MarketInventoryProject/pom.xml .
+COPY MarketInventoryProject/src ./src
 
-# compilar y empaquetar
+
+
 RUN mvn clean package -DskipTests
 
-# etapa de ejecución con JRE
+# Etapa de runtime con JRE ligero
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# copiar el JAR generado
+# Copiamos el JAR generado en la etapa de build
 COPY --from=build /app/target/*.jar app.jar
 
-# instrucción de arranque
+# Arrancamos la aplicación
 ENTRYPOINT ["java","-jar","app.jar"]
