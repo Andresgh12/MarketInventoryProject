@@ -6,8 +6,7 @@ Aplicación web desarrollada con **Spring Boot**, **Thymeleaf** y **Bootstrap** 
 
 ## 🚀 Despliegue en producción
 
-🔗 Accede aquí: [https://NOMBRE-DEL-PROYECTO.up.railway.app/web/productos](https://NOMBRE-DEL-PROYECTO.up.railway.app/web/productos)  
-> Cambia `NOMBRE-DEL-PROYECTO` por tu subdominio real en Railway.
+🔗 Accede aquí: https://marketinventoryproject-production.up.railway.app/web/productos
 
 ---
 
